@@ -2,6 +2,7 @@
 A focus on core javascript features
 
 examples for using power.js along:
+```javascript
 var obj = {
   prop1: 1
 };
@@ -22,3 +23,4 @@ $(obj).watch('prop1', function(e, propName, oldVal, newVal) {
   alert('property'+propName+' has changed from ' + oldVal + ' to ' + newVal); 
 });
 obj.prop1 = 2; // an alert should pop-up
+```
