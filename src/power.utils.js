@@ -1,156 +1,13 @@
 ﻿// ---------------- power-js-utils ------------------ \\
 /*
- * $.fn.watch, $.fn.unwatch
- *
  * 2014-04-03
  *
  * By Shmuel Friedman
  * USE AT YOUR OWN RISK.
  */
 
-function oneTimeSubscribe(observable, trigerringValue, callback) {
-    var hasCallbackCalled = false;
-    var subscription;
-
-    this.launch = launch;
-    this.dispose = dispose;
-
-    function launch() {
-        if (checkIntegrity(observable()) || hasCallbackCalled)
-            return;
-
-        subscription = observable.subscribe(trackChanges);
-    }
-
-    function trackChanges(newVal) {
-        if (checkIntegrity(newVal)) {
-            subscription.dispose();
-            subscription = null;
-        }
-    }
-
-    function checkIntegrity(val) {
-        if (val == trigerringValue && !hasCallbackCalled) {
-            hasCallbackCalled = true;
-            callback();
-            return true;
-        }
-    }
-
-    function dispose() {
-        hasCallbackCalled = false;
-        if (subscription)
-            subscription.dispose();
-    }
-
-    this.hasCallbackCalled = function () {
-        return hasCallbackCalled;
-    }
-}
-function koDependency(observable1, observable2, opopsiteVals, biDirection) {
-    if (opopsiteVals) {
-        observable1(!observable2());
-        observable2.subscribe(function (val) {
-            observable1(!val);
-        });
-        if (biDirection) {
-            observable2(!observable1());
-            observable1.subscribe(function (val) {
-                observable2(!val);
-            });
-        }
-    }
-    else {
-        observable1(observable2());
-        observable2.subscribe(function (val) {
-            observable1(val);
-        });
-        if (biDirection) {
-            observable2(observable1());
-            observable1.subscribe(function (val) {
-                observable2(val);
-            });
-        }
-    }
-}
-
-(function(ko) {
-    {
-        var overridden = ko.bindingHandlers['html'].update;
-
-        ko.bindingHandlers['html'].update = function (element, valueAccessor) {
-            if (element.nodeType === 8) {
-                var html = ko.utils.unwrapObservable(valueAccessor());
-
-                ko.virtualElements.emptyNode(element);
-                if ((html !== null) && (html !== undefined)) {
-                    if (typeof html !== 'string') {
-                        html = html.toString();
-                    }
-
-                    var parsedNodes = ko.utils.parseHtmlFragment(html);
-                    if (parsedNodes) {
-                        var endCommentNode = element.nextSibling;
-                        for (var i = 0, j = parsedNodes.length; i < j; i++)
-                            endCommentNode.parentNode.insertBefore(parsedNodes[i], endCommentNode);
-                    }
-                }
-            } else { // plain node
-                overridden(element, valueAccessor);
-            }
-        };
-    }
-    ko.virtualElements.allowedBindings['html'] = true;
-
-
-    ko.subscribable.fn.subscribeChanged = function (callback, filterNonChange) {
-        var oldValue;
-        var beforeSubscription, afterSubscription;
-        beforeSubscription = this.subscribe(function (_oldValue) {
-            oldValue = _oldValue;
-        }, this, 'beforeChange');
-
-        afterSubscription = this.subscribe(function (newValue) {
-            if (!filterNonChange || (newValue !== oldValue))
-                callback(newValue, oldValue);
-        });
-
-        return {
-            dispose: function () {
-                beforeSubscription.dispose();
-                afterSubscription.dispose();
-                oldValue = null;
-            }
-        };
-    };
-
+(function(ko, $) {
     var rideKo = false;
-    var jspComputed;
-    (function () {
-        var koComputed = ko.computed;
-        jspComputed = function (opts) {
-            var comp,
-                disposeWhen;
-            if (!(opts instanceof Function))
-                if (ko.isObservable(opts.disposeWhen)) {
-                    disposeWhen = opts.disposeWhen;
-                    delete opts.disposeWhen;
-                }
-            comp = koComputed.apply(ko, arguments);
-            if (disposeWhen) {
-                var origDispose = comp.dispose;
-                var sscr = new subscribeMatch(disposeWhen, true, function () {
-                    comp.dispose();
-                });
-                if (!disposeWhen())
-                    comp.dispose = function () {
-                        origDispose.apply(comp, arguments);
-                        sscr.dispose();
-                    };
-            }
-            return comp;
-        };
-    })();
 
     var disposable = function (func, disposeFunc, onOffSwitch, canInitTester, reuse) {
         var self = this;
@@ -250,9 +107,6 @@ function koDependency(observable1, observable2, opopsiteVals, biDirection) {
             propDependencies: propDependencies,
             forwardMembers: forwardMembers,
             passThroughEvents: passThroughEvents,
-            clearComputeds: clearKoMappedObj,
-            fromJS: fromJS,
-            toJS: toJS,
             propAgg: propAgg,
             agg: agg,
             min: min,
@@ -265,7 +119,6 @@ function koDependency(observable1, observable2, opopsiteVals, biDirection) {
                 this.linkWithWatch = linkWithWatch;
             }
         },
-        computed: jspComputed,
         disposable: disposable,
         disposableJEvent: disposableJEvent
     };
@@ -273,70 +126,6 @@ function koDependency(observable1, observable2, opopsiteVals, biDirection) {
         $.extend(true, window, { ko: jspowerUtils });
     else
         jspower = jspowerUtils;
-
-    var maxLevel = 30;
-    function fromJS(model, level, reuse) {
-        var res;
-        if (level == null) level = 0;
-        if (level > maxLevel)
-            throw 'maximum recursion level reached';
-        if (model instanceof Array) {
-            var clonedArray = [];
-            for (var i = 0; i < model.length; i++) {
-                clonedArray[i] = fromJS(model[i], level + 1);
-            }
-            res = ko.observableArray(clonedArray);
-        }
-        else if (model instanceof Object) {
-            res = {};
-            for (var key in model) {
-                if (isLegalProp(key))
-                    res[key] = fromJS(model[key], level + 1);
-            }
-        }
-        else {
-            res = ko.observable(model);
-        }
-        return res;
-    }
-    
-    function toJS(model, level, reuse) {
-        var res;
-        if (level == null) level = 0;
-        if (level > maxLevel)
-            throw 'maximum recursion level reached';
-        if (ko.isObservable(model)) {
-            var unwrapedModel = model();;
-            if (model.splice) {//model instanceof ObservableArray
-                var res = [];
-                for (var i = 0; i < unwrapedModel.length; i++) {
-                    res[i] = toJS(unwrapedModel[i], level + 1);
-                }
-            }
-            else if (unwrapedModel instanceof Object){
-                res = {};
-                for (var key in unwrapedModel) {
-                    if (key)
-                        res[key] = toJS(unwrapedModel[key], level + 1);
-                }
-            }
-            else
-                res = unwrapedModel;
-        }
-        else if (model instanceof Object) {
-            res = {};
-            for (var key in model) {
-                if (isLegalProp(key))
-                    res[key] = toJS(model[key], level + 1);
-            }
-        }
-        else 
-            res = model;
-        return res;
-    }
-    function isLegalProp(key) {
-        return !(key == null || (key.indexOf('jQuery') == 0 && key.length > 20));
-    }
 
     function getVal(obj) { return ko.isObservable(obj) ? obj() : obj.obj[obj.key]; };
 
@@ -567,7 +356,7 @@ function koDependency(observable1, observable2, opopsiteVals, biDirection) {
     
     function agg(arr, prop) {
         var getProp = propGetter(arr, prop);
-        var ret = {}
+        var ret = {};
         arr.forEach(function (item) {
             var val = getProp(item);
             if (!ret[val]) ret[val] = [];
@@ -610,30 +399,25 @@ function koDependency(observable1, observable2, opopsiteVals, biDirection) {
     //            res[prop] = propAgg(arr, propActions[prop]
     //        }
     //    }
+    
+    ko.subscribable.fn.subscribeChanged = function (callback, filterNonChange) {
+        var oldValue;
+        var beforeSubscription, afterSubscription;
+        beforeSubscription = this.subscribe(function (_oldValue) {
+            oldValue = _oldValue;
+        }, this, 'beforeChange');
 
-    function clearKoMappedObj(obj, level) {
-        function clearObservable(obs) {
-            if (ko.isComputed(obs))
-                obs.dispose();
-            /*var sscr = obs._subscriptions;
-            Object.keys(sscr).forEach(function (sscrType) { for (var i = sscr[sscrType].length - 1; i >= 0; i--) sscr[sscrType][i].dispose(); });*/
-        }
-        if (level == null) level = 0;
-        //if (level > 15) debugger;
+        afterSubscription = this.subscribe(function (newValue) {
+            if (!filterNonChange || (newValue !== oldValue))
+                callback(newValue, oldValue);
+        });
 
-        var isKO = ko.isObservable(obj);
-        if (isKO) {
-            var val = obj();
-            //if (obj[key].splice instanceof Function) {
-            clearKoMappedObj(val, level + 1);
-            clearObservable(obj);
-        }
-        else if (obj instanceof Function)
-            return;
-        else if (obj instanceof Array)
-            obj.forEach(function (prop) { clearKoMappedObj(prop, level + 1); });
-        else if (obj instanceof Object)
-            Object.keys(obj).forEach(function (key) { clearKoMappedObj(obj[key], level + 1); });
-    }
-
-})(ko);
+        return {
+            dispose: function () {
+                beforeSubscription.dispose();
+                afterSubscription.dispose();
+                oldValue = null;
+            }
+        };
+    };
+})(ko, $);
