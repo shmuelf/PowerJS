@@ -1,4 +1,5 @@
-(function(ko, $) {
+// https://github.com/shmuelf/PowerJS
+(function (ko, $) {
     var rideKo = false;
     var jspComputed;
     (function () {
