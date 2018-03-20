@@ -128,8 +128,12 @@
     };
     if (rideKo)
         $.extend(true, window, { ko: jspowerKoUtils });
-    else
-        waitObjectProp(window, 'jspower', function (obj) { 
-            $.extend(true, obj, jspowerKoUtils); 
-        });
+    else {
+        if (typeof waitObjectProp == 'undefined')
+            jspower = jspowerKoUtils;
+        else
+            waitObjectProp(window, 'jspower', function (obj) {
+                $.extend(true, obj, jspowerKoUtils);
+            });
+    }
 })(ko, $);
