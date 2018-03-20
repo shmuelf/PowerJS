@@ -29,27 +29,31 @@
     })();
     
     var maxLevel = 30;
-    function fromJS(model, level, reuse) {
+    function fromJS(model, level, observableFactory) {
         var res;
+        if (!observableFactory)
+            observableFactory = function (intVal) {
+                return intVal instanceof Array ? ko.observableArray(initVal) : ko.observable(initVal);
+            };
         if (level == null) level = 0;
         if (level > maxLevel)
             throw 'maximum recursion level reached';
         if (model instanceof Array) {
             var clonedArray = [];
             for (var i = 0; i < model.length; i++) {
-                clonedArray[i] = fromJS(model[i], level + 1);
+                clonedArray[i] = fromJS(model[i], level + 1, observableFactory);
             }
-            res = ko.observableArray(clonedArray);
+            res = observableFactory(clonedArray);
         }
         else if (model instanceof Object) {
             res = {};
             for (var key in model) {
                 if (isLegalProp(key))
-                    res[key] = fromJS(model[key], level + 1);
+                    res[key] = fromJS(model[key], level + 1, observableFactory);
             }
         }
         else {
-            res = ko.observable(model);
+            res = observableFactory(model);
         }
         return res;
     }
