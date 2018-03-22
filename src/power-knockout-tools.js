@@ -36,7 +36,7 @@
                 return intVal instanceof Array ? ko.observableArray(initVal) : ko.observable(initVal);
             };
         if (level == null) level = 0;
-        if (level > maxLevel)
+        if (maxLevel != null && level > maxLevel)
             throw 'maximum recursion level reached';
         if (model instanceof Array) {
             var clonedArray = [];
@@ -57,21 +57,21 @@
         }
         return res;
     }
-    
+
     function toJS(model, level, reuse) {
         var res;
         if (level == null) level = 0;
-        if (level > maxLevel)
+        if (maxLevel != null && level > maxLevel)
             throw 'maximum recursion level reached';
         if (ko.isObservable(model)) {
-            var unwrapedModel = model();;
+            var unwrapedModel = model();
             if (model.splice) {//model instanceof ObservableArray
                 res = [];
                 for (var i = 0; i < unwrapedModel.length; i++) {
                     res[i] = toJS(unwrapedModel[i], level + 1);
                 }
             }
-            else if (unwrapedModel instanceof Object){
+            else if (unwrapedModel instanceof Object) {
                 res = {};
                 for (var key in unwrapedModel) {
                     if (key)
@@ -81,6 +81,12 @@
             else
                 res = unwrapedModel;
         }
+        else if (model instanceof Array) {
+            res = [];
+            for (var i = 0; i < model.length; i++) {
+                res[i] = toJS(model[i], level + 1);
+            }
+        }
         else if (model instanceof Object) {
             res = {};
             for (var key in model) {
@@ -88,7 +94,7 @@
                     res[key] = toJS(model[key], level + 1);
             }
         }
-        else 
+        else
             res = model;
         return res;
     }
