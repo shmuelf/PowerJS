@@ -151,7 +151,7 @@
     function subscribeMatch(observable, trigerringValue, callback, reuse, dontLaunch) {
         var hasCallbackCalled = false;
         var subscription;
-        var that = this === self || this === jspowerUtils.utils ? Object.create(subscribeMatch) : this;
+        var that = this === self || this === jspowerUtils.utils ? Object.create(subscribeMatch.prototype) : this;
 
         that.launch = launch;
         that.dispose = dispose;
@@ -237,7 +237,7 @@
     };
 
     function propDependencies(subscriberObj, publisherObj, propsArr, disposeWhen, oppositeVals, biDirection, leftToRight, rightToLeft, dontInitValues) {
-        var that = this instanceof propDependencies ? this : Object.create(propDependencies); // check if running as constructor, else initiating based on empty instance;
+        var that = this instanceof propDependencies ? this : Object.create(propDependencies.prototype); // check if running as constructor, else initiating based on empty instance;
         function getSubscribeable(obj, prop) {
             var subscribeable;
             if (typeof prop == 'string') {

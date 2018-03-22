@@ -89,6 +89,58 @@ function inherit(type, parent, constructorArgs, noConstructorCall) {
     return type;
 }
 
+/*Function.prototype.inherit = function (Parent) {
+    return Function.inherit(this, Parent);
+}*/
+Function.inherit = function (Type, Parent) {
+    if (Type.prototype instanceof Parent && Type.prototype.__constructor)
+        return Type.prototype.__constructor;
+    //NewType.prototype = Object.create(Type.prototype);
+    //NewType.prototype.constructor = NewType;
+    var props = $.extend({}, Type.prototype);
+    Type.prototype = Object.create(Parent.prototype);
+    Type.prototype.constructor = Type;
+    Type.prototype.__constructor = NewType;
+    $.extend(Type.prototype, props);
+
+    return NewType;
+
+    function NewType() {
+        //var instance = this;
+        var instance = Object.create(Type.prototype);
+        Parent.apply(instance, arguments);
+        instance._parent = $.extend({}, instance);
+        Object.getOwnPropertyNames(instance._parent).forEach(function (member) {
+            if (instance._parent[member] instanceof Function)
+                instance._parent[member] = instance._parent[member].bind(instance);
+        });
+        Type.apply(instance, arguments);
+        return instance;
+    }
+};
+
+/*Function.prototype.inherit = function(Parent, self) {
+    var newClass = function() { };
+    newClass.prototype = Object.create(this.prototype);
+    this.prototype = Object.create(Parent.prototype);
+    var callee = this;
+    return function() {
+        var _parent = {};
+        var newInstance = Object.create(callee.prototype);
+        Parent.apply(newInstance, arguments);
+        newInstance._getParent = function() {
+            var _self = this;
+            for (var prop in callee.prototype)
+                _parent[prop] = callee.prototype[prop].bind(_self);
+            _parent.prototype = Object.create(callee.prototype);
+            delete newInstance._getParent;
+            newInstance = null;
+            return _parent;
+        };
+        callee.apply(newInstance, arguments);
+        return newInstance;
+    }
+}*/
 function waitObjectProp(obj, prop, callback, reuse) {
     if (obj[prop])
         callback();

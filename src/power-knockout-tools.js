@@ -29,8 +29,8 @@
     })();
     
     var maxLevel = 30;
-    function fromJS(model, level, observableFactory) {
-        var res;
+    function fromJS(model, level, observableFactory, dontWrapPrimitives) {
+        var res = model;
         if (!observableFactory)
             observableFactory = function (intVal) {
                 return intVal instanceof Array ? ko.observableArray(initVal) : ko.observable(initVal);
@@ -41,18 +41,18 @@
         if (model instanceof Array) {
             var clonedArray = [];
             for (var i = 0; i < model.length; i++) {
-                clonedArray[i] = fromJS(model[i], level + 1, observableFactory);
+                clonedArray[i] = fromJS(model[i], level + 1, observableFactory, true);
             }
             res = observableFactory(clonedArray);
         }
-        else if (model instanceof Object) {
+        else if (model instanceof Object && !(model instanceof Date)) {
             res = {};
             for (var key in model) {
                 if (isLegalProp(key))
                     res[key] = fromJS(model[key], level + 1, observableFactory);
             }
         }
-        else {
+        else if (!dontWrapPrimitives) {
             res = observableFactory(model);
         }
         return res;
