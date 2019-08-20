@@ -28,35 +28,35 @@
         };
     })();
     
-    var maxLevel = 30;
-    function fromJS(model, level, observableFactory, dontWrapPrimitives) {
-        var res = model;
-        if (!observableFactory)
-            observableFactory = function (intVal) {
-                return intVal instanceof Array ? ko.observableArray(initVal) : ko.observable(initVal);
-            };
-        if (level == null) level = 0;
-        if (maxLevel != null && level > maxLevel)
-            throw 'maximum recursion level reached';
-        if (model instanceof Array) {
-            var clonedArray = [];
-            for (var i = 0; i < model.length; i++) {
-                clonedArray[i] = fromJS(model[i], level + 1, observableFactory, true);
-            }
-            res = observableFactory(clonedArray);
+    var fromJS = (()=> {
+        return (model, level, observableFactory, dontWrapPrimitives) => {
+          if (!observableFactory)
+            observableFactory = _observableFactory;
+            
+          var transform = (obj, parent, level) =>
+            (
+              ( !( obj instanceof Array )
+                && obj instanceof Object
+              )
+              || ( parent instanceof Array )
+              || ( dontWrapPrimitives && isPrimitive(obj) )
+            )
+            ? obj
+            : observableFactory(obj);
+          
+          return scan(model, transform, isLegalProp);
+        };
+        
+        function _observableFactory(intVal) {
+          return intVal instanceof Array ?
+            ko.observableArray(initVal) :
+            ko.observable(initVal);
         }
-        else if (model instanceof Object && !(model instanceof Date)) {
-            res = {};
-            for (var key in model) {
-                if (isLegalProp(key))
-                    res[key] = fromJS(model[key], level + 1, observableFactory);
-            }
+  
+        function isPrimitive(obj) {
+          return !(obj instanceof Object) || (obj instanceof Date);
         }
-        else if (!dontWrapPrimitives) {
-            res = observableFactory(model);
-        }
-        return res;
-    }
+      })();
 
     function toJS(model, level, reuse) {
         var res;
@@ -99,8 +99,13 @@
         return res;
     }
     function isLegalProp(key) {
-        return !(key == null || (key.indexOf('jQuery') == 0 && key.length > 20));
-    }
+        return !(  
+            key == null 
+            ||(     key.indexOf('jQuery') == 0 
+                &&  key.length > 20
+            )
+          );
+      }
 
     function clearKoMappedObj(obj) {
         var level = arguments[1];
