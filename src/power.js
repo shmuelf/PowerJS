@@ -246,7 +246,7 @@ function scan(model, transform, propertyFilter) {
     if (arguments.length <= 3) {
         level = 0;
         if (!propertyFilter)
-            propertyFilter = prop => key != null;
+            propertyFilter = prop => prop != null;
     }
     if (maxLevel != null && level > maxLevel)
         throw 'maximum recursion level reached';
