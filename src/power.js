@@ -14,7 +14,7 @@
       var watchKey = $.camelCase('watch-' + prop);
       return this.each(function () {
           var $this = $(this);
-          $this.bind(watchKey, callback);
+          $this.on(watchKey, callback);
 
           if ($this.data(watchKey)) return;
           var
