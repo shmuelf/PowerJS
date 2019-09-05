@@ -66,6 +66,8 @@
         document.head.appendChild(e);
     })(document.createElement('script'), );*/
 
-    //jspower.injector.importSync(jqueryPath).then(() => window.$$3 = jQuery.noConflict());
-    //jspower.injector.importSync(lodashUrl);
+    window.imports = jspower.injector.importSync;
+    //imports('https://raw.githubusercontent.com/shmuelf/PowerJS/master/src/power-scrapping.js');
+    //imports(jqueryPath).then(() => window.$$3 = jQuery.noConflict());
+    //imports(lodashUrl);
 })();
