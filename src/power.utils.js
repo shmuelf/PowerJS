@@ -125,7 +125,7 @@
     if (rideKo)
         $.extend(true, window, { ko: jspowerUtils });
     else
-        jspower = jspowerUtils;
+        $.extend(true, window, { jspower: jspowerUtils };
 
     function getVal(obj) { return ko.isObservable(obj) ? obj() : obj.obj[obj.key]; };
 

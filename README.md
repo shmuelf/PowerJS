@@ -6,7 +6,7 @@ examples for using power.js along:
 var obj = {
   prop1: 1
 };
-waitObjectProp(obj, 'service', function(e, svc) { 
+jspower.waitObjectProp(obj, 'service', function(e, svc) { 
   alert('my service is ready'); 
   svc.work(); 
 });

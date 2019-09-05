@@ -44,7 +44,7 @@
             ? obj
             : observableFactory(obj);
           
-          return scan(model, transform, isLegalProp);
+          return jspower.scan(model, transform, isLegalProp);
         };
         
         function _observableFactory(intVal) {
@@ -143,12 +143,6 @@
     };
     if (rideKo)
         $.extend(true, window, { ko: jspowerKoUtils });
-    else {
-        if (typeof waitObjectProp == 'undefined')
-            jspower = jspowerKoUtils;
-        else
-            waitObjectProp(window, 'jspower', function (obj) {
-                $.extend(true, obj, jspowerKoUtils);
-            });
-    }
+    else 
+        $.extend(true, window, {jspower:jspowerKoUtils});
 })(ko, $);
