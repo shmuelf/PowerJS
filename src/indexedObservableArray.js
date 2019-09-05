@@ -1,13 +1,20 @@
-﻿//writen by shmuel friedman 2013
-function indexedObservableArray(arr, indeces) {
+﻿// ---------------- power-js indexed-observable-array ------------------ \\
+/*
+ * 2013
+ *
+ * By Shmuel Friedman
+ * https://github.com/shmuelf/PowerJS
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+ */
+function indexedObservableArray(arr, indices) {
     var array = arr && ko.isObservable(arr) ? arr : arr ? ko.observableArray(arr) : ko.observableArray(arr = []);
 
-    var _indeces = {};
+    var _indices = {};
 
     array.index = function (propName) {
-        if (!_indeces[propName])
-            _indeces[propName] = new ArrayIndex(array, propName);
-        return _indeces[propName];
+        if (!_indices[propName])
+            _indices[propName] = new ArrayIndex(array, propName);
+        return _indices[propName];
     };
 
     array.getBy = function (propName, value) {
@@ -15,7 +22,7 @@ function indexedObservableArray(arr, indeces) {
     }
 
     array.removeBy = function (propName, value) {
-        var index = _indeces[propName];
+        var index = _indices[propName];
         var idx;
         if (index) 
             idx = index.getIndex(value);
@@ -33,9 +40,9 @@ function indexedObservableArray(arr, indeces) {
 
     var oldDispose = array.dispose;
     array.dispose = function () {
-        for (var idx in _indeces) {
-            _indeces[idx].dispose();
-            delete _indeces[idx];
+        for (var idx in _indices) {
+            _indices[idx].dispose();
+            delete _indices[idx];
         }
         oldDispose.apply(array, arguments);
     };
@@ -100,8 +107,8 @@ function indexedObservableArray(arr, indeces) {
         }
     }
 
-    if (indeces)
-        indeces.forEach(function (idx) { array.index(idx); });
+    if (indices)
+        indices.forEach(function (idx) { array.index(idx); });
 
     return array;
 }

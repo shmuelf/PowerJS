@@ -1,4 +1,14 @@
-// https://github.com/shmuelf/PowerJS
+// ---------------- jspower utils ------------------ \\
+/*
+ * jspComputed, fromJS, toJS, clearKoMappedObj
+ *
+ * 2014-04-03
+ *
+ * By Shmuel Friedman
+ * https://github.com/shmuelf/PowerJS
+ * Public Domain.
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+ */
 (function (ko, $) {
     var rideKo = false;
     var jspComputed;

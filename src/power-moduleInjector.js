@@ -1,12 +1,21 @@
+// ---------------- jspower module-injector ------------------ \\
+/*
+ * fetchSync,SyncPromise
+ *
+ * 2019-09-06
+ *
+ * By Shmuel Friedman
+ * https://github.com/shmuelf/PowerJS
+ * Public Domain.
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+ */
 (function() {
     var jspower = window.jspower = window.jspower || {};
     if (jspower.injector) return;
     jspower.injector = {fetchSync,SyncPromise};
 
     jspower.injector.importSync = url => fetchSync(url)
-        //.then(response => response.text())
-        .then(text => eval(text),/*)
-        .catch(*/r => console.error(r)); 
+        .then(text => eval(text), r => console.error(r)); 
 
     function fetchSync(url) {
         return new SyncPromise((res,rej)=>{
@@ -51,23 +60,14 @@
         return that;
     }
 
+    window.imports = jspower.injector.importSync;
+    //imports('https://raw.githubusercontent.com/shmuelf/PowerJS/master/src/power-scrapping.js');
+    //imports('http://code.jquery.com/jquery-latest.min.js').then(() => window.$$3 = jQuery.noConflict());
+    //imports('https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js');
+
+    //following one's from Maciej Bukowski at https://stackoverflow.com/a/38700405/6553339
     jspower.injector.importCors = url => fetch(url)
         .then(response => response.text())
         .then(text => eval(text))
         .catch(r => console.error(r));
-
-    //"<meta http-equiv=\"Content-Security-Policy\" content=\"default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'\" />"
-    /*(function(e, s) {
-        e.src = s;
-        e.onload = function() {
-            window.$$3 = jQuery.noConflict();
-            console.log('jQuery injected');
-        };
-        document.head.appendChild(e);
-    })(document.createElement('script'), );*/
-
-    window.imports = jspower.injector.importSync;
-    //imports('https://raw.githubusercontent.com/shmuelf/PowerJS/master/src/power-scrapping.js');
-    //imports(jqueryPath).then(() => window.$$3 = jQuery.noConflict());
-    //imports(lodashUrl);
 })();

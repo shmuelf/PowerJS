@@ -3,7 +3,8 @@
  * 2014-04-03
  *
  * By Shmuel Friedman
- * USE AT YOUR OWN RISK.
+ * https://github.com/shmuelf/PowerJS
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
  */
 
 (function(ko, $) {
@@ -125,7 +126,7 @@
     if (rideKo)
         $.extend(true, window, { ko: jspowerUtils });
     else
-        $.extend(true, window, { jspower: jspowerUtils };
+        $.extend(true, window, { jspower: jspowerUtils });
 
     function getVal(obj) { return ko.isObservable(obj) ? obj() : obj.obj[obj.key]; };
 

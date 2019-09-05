@@ -1,3 +1,14 @@
+// ---------------- jspower scrapper ------------------ \\
+/*
+ * waitForDomQuery, popNav, taskDelay
+ *
+ * 2019-09-06
+ *
+ * By Shmuel Friedman
+ * https://github.com/shmuelf/PowerJS
+ * Public Domain.
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+ */
 (function() {
     var jspower = window.jspower = window.jspower || {};
     if (jspower.scrapper) return;
@@ -74,7 +85,7 @@
     }
     function launch(url) {
       var win = window.open(url, '_blank');
-      win.focus();
+      //win.focus();
       return win;
     }
 

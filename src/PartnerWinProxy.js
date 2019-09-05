@@ -1,4 +1,14 @@
-﻿function PartnerWinProxy(partnerWin, origin) {
+﻿// ---------------- power-js-partnerWinProxy ------------------ \\
+/*
+ * a utility for seamlessly communicating between two browser windows, dispatching an object proxies, 
+ * a proxy automatically synchronizes properties, passes method calls & passthrough object events
+ * 2014-04-03
+ *
+ * By Shmuel Friedman
+ * https://github.com/shmuelf/PowerJS
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+ */
+function PartnerWinProxy(partnerWin, origin) {
     var self = this;
 
     var assets = [];
