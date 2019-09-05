@@ -149,9 +149,9 @@
       else {
           var _callback = (e,p,oldVal,val) => callback(val);
           if (!reuse)
-              _callback = function (e,props) {
+              _callback = function (e,p,oldVal,val) {
                   $(obj).unwatch(prop, _callback);
-                  callback(obj[prop]);
+                  callback(val);
               };
           $(obj).watch(prop, _callback);
       }
