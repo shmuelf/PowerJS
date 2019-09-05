@@ -145,13 +145,13 @@
   }*/
   function waitObjectProp(obj, prop, callback, reuse) {
       if (obj[prop])
-          callback();
+          callback(obj[prop]);
       else {
-          var _callback = callback;
+          var _callback = (e,p,oldVal,val) => callback(val);
           if (!reuse)
-              _callback = function (e) {
+              _callback = function (e,props) {
                   $(obj).unwatch(prop, _callback);
-                  callback(e, obj[prop]);
+                  callback(obj[prop]);
               };
           $(obj).watch(prop, _callback);
       }
