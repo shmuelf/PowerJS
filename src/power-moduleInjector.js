@@ -17,17 +17,20 @@
     jspower.injector.importSync = url => fetchSync(url)
         .then(text => eval(text), r => console.error(r)); 
 
+    let fetchedUrls = {};
     function fetchSync(url) {
-        return new SyncPromise((res,rej)=>{
-            let resp;
-            var oReq = new XMLHttpRequest();
-            //oReq.addEventListener("load", e => res(oReq.responseText));
-            oReq.addEventListener("error", e => rej(oReq.responseText));
-            oReq.open("GET", url, false);
-            oReq.send();
-            if (oReq.responseText)
-                res(oReq.responseText);
-        });
+        return fetchedUrls[url] || 
+            (   fetchedUrls[url] = new SyncPromise((res,rej)=>{
+                    let resp;
+                    var oReq = new XMLHttpRequest();
+                    //oReq.addEventListener("load", e => res(oReq.responseText));
+                    oReq.addEventListener("error", e => rej(oReq.responseText));
+                    oReq.open("GET", url, false);
+                    oReq.send();
+                    if (oReq.responseText)
+                        res(oReq.responseText);
+                })
+            );
     }
     function SyncPromise(f) {
         let that = this;
