@@ -11,6 +11,14 @@
  */
 (function($,window){
 // $(object).watch
+  let isJqDefined = typeof '$' != 'undefined';
+  if (!isJqDefined || !('fn' in $)) {
+    if (typeof imports != 'undefined')
+        let jqReady = imports('http://code.jquery.com/jquery-latest.min.js');
+        $ = jQuery;
+        if (isJqDefined)
+            jqReady.then(() => window.$$3 = jQuery.noConflict());
+  }
   $.fn.watch = function (prop, callback) {
       var watchKey = $.camelCase('watch-' + prop);
       return this.each(function () {
