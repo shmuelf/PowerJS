@@ -53,7 +53,7 @@
             catch(ex) { rej(ex); }
         });
       else
-        $_1 = win.$.bind(win) || doc.querySelector.bind(doc);
+        $_1 = (win.$ && win.$.bind(win)) || doc.querySelector.bind(doc);
       let elem = $_1(qry);
       if (elem)
           return elem;
