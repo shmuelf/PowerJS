@@ -253,28 +253,32 @@
   var maxLevel = 30;
   function scan(model, transform, propertyFilter) {
     var res = model;
-    const[, , , parent, level] = arguments;
-    if (arguments.length <= 3) {
-        level = 0;
-        if (!propertyFilter)
-            propertyFilter = prop => prop != null;
+    let [, , , parent, level, path] = arguments;
+
+    if (arguments.length < 6) {
+        path = '$';
+        if (arguments.length < 5) {
+            level = 0;
+            if (!propertyFilter) // args < 3
+                propertyFilter = prop => prop != null;
+        }
     }
     if (maxLevel != null && level > maxLevel)
         throw 'maximum recursion level reached';
     if (model instanceof Array) {
         res = [];
         for (var i = 0; i < model.length; i++) {
-            res[i] = scan(model[i], transform, propertyFilter, model, level + 1);
+            res[i] = scan(model[i], transform, propertyFilter, model, level + 1, `${path}[${i}]`);
         }
     } else if (model instanceof Object && !(model instanceof Date)) {
         res = {};
         for (var key in model) {
             if (propertyFilter(key))
-                res[key] = scan(model[key], transform, propertyFilter, model, level + 1);
+                res[key] = scan(model[key], transform, propertyFilter, model, level + 1, `${path}.${key}`);
         }
     }
-    return transform(res, parent, level);
-}
+    return transform(res, parent, level, path);
+  }
 
   if (typeof disposable == 'undefined')
       waitObjectProp(jspower, 'disposable', function (obj) { 
