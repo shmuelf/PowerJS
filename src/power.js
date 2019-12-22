@@ -253,7 +253,7 @@
   var maxLevel = 30;
   function scan(model, transform, propertyFilter) {
     var res = model;
-    let [, , , parent, level, path] = arguments;
+    let [, , , parent, level, path, parentPath, itemKey] = Array.prototype.slice.call(arguments, 0);
 
     if (arguments.length < 6) {
         path = '$';
@@ -268,16 +268,16 @@
     if (model instanceof Array) {
         res = [];
         for (var i = 0; i < model.length; i++) {
-            res[i] = scan(model[i], transform, propertyFilter, model, level + 1, `${path}[${i}]`);
+            res[i] = scan(model[i], transform, propertyFilter, model, level + 1, `${path}[${i}]`, path, i);
         }
     } else if (model instanceof Object && !(model instanceof Date)) {
         res = {};
         for (var key in model) {
             if (propertyFilter(key))
-                res[key] = scan(model[key], transform, propertyFilter, model, level + 1, `${path}.${key}`);
+                res[key] = scan(model[key], transform, propertyFilter, model, level + 1, `${path}.${key}`, path, key);
         }
     }
-    return transform(res, parent, level, path);
+    return transform(res, parent, level, path, parentPath, itemKey);
   }
 
   if (typeof disposable == 'undefined')
