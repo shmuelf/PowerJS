@@ -9,3 +9,10 @@ function arr2csv(arr) {
                 .join(','))
             .join('\r\n'));
 }
+
+Date.prototype.add = function(type, value) {
+	var date = new Date(this.getTime());
+	type=`${type[0].toUpperCase()}${type.substr(1)}`
+	date[`set${type}`](date[`get${type}`]()+value);
+	return date;
+};
